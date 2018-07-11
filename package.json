@@ -1,0 +1,20 @@
+{
+  "name": "tamperdav",
+  "version": "1.0.0",
+  "description": "Simple NodeJS-based WebDAV-like server",
+  "author": {
+    "name": "Jan Biniok",
+    "email": "jan@biniok.net"
+  },
+  "license": "MIT",
+  "files": [
+    "server.js"
+  ],
+  "dependencies": [
+    "chokidar",
+    "upath",
+    "dialog",
+    "open"
+  ],
+  "main": "server.js"
+}
