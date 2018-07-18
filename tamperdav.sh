@@ -6,7 +6,7 @@ mkdir dav 2>/dev/null
 cat > config.json <<EOL
 {
     "path": "dav",
-    "metatouch": true,
+    "meta-touch": true,
     "open-in-editor": true
 }
 EOL

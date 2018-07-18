@@ -380,7 +380,7 @@ const assureWatcher = function(rpath) {
         var path = upath.normalize(_path);
         var cc;
         var filename = path.replace(new RegExp('^' + RegExp.escape(fpath) + '\/?'), '');
-        if (args.metatouch) {
+        if (args['meta-touch']) {
             var n, meta, m;
             if ((m = path.match(/(.*)\.user.js$/)) && (n = m[1]) && (meta = `${n}.meta.json`) && fs.existsSync(meta)) {
                 if (args.debug) console.log('metatouch: ', meta);

@@ -5,6 +5,7 @@ A WebDAV-like server to sync Tampermonkey scripts and edit them with an external
 
 **WARNING:** this is not a 100% WebDAV-compliant server. Many clients should, but don't necessarily have to work!
 
+
 # Usage
 
 Make sure [Node.js](https://nodejs.org/) greater than v4.9 is installed.
@@ -19,9 +20,16 @@ execute ```TamperDAV.bat```
 $ ./tamperdav.sh
 ```
 
+
+# Clients
+
 ## Tampermonkey (4.7.5823+)
 
 ![alt text](https://user-images.githubusercontent.com/767504/42598819-a1fb04a0-855d-11e8-8b42-a86abf577d82.png)
+
+Notes:
+ * in order to allow Tampermonkey to use the full TamperDAV feature set, please make sure TamperDAV is **running** when Tampermonkey is started.
+ * you can easily find the right file to edit by running `node find_script_in_meta.js --name="My Script Name"`
 
 ## mount
 
@@ -44,6 +52,7 @@ $ npm install
 $ mkdir dav
 $ node server.js --path=dav/
 ```
+
 
 # Config
 

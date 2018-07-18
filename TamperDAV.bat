@@ -4,7 +4,7 @@ mkdir dav
 (
   echo {
   echo "path": "dav",
-  echo "metatouch": true,
+  echo "meta-touch": true,
   echo "open-in-editor": true
   echo }
 ) > config.json
