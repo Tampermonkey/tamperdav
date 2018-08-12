@@ -135,10 +135,12 @@ const methods = {
             response.statusCode = 501;
             response.end();
             return;
-        } else if (process.platform == 'win32' && editor === true) {
-            editor = 'notepad';
-        } else {
-            editor = undefined;
+        } else if (editor === true) {
+            if (process.platform == 'win32') {
+                editor = 'notepad';
+            } else {
+                editor = undefined;
+            }
         }
 
         var rpath = uri.pathname;
