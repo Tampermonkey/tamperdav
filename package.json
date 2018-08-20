@@ -14,7 +14,7 @@
     "chokidar",
     "upath",
     "dialog",
-    "open",
+    "opn",
     "glob"
   ],
   "main": "server.js"

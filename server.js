@@ -11,7 +11,7 @@ const url = require('url');
 const dialog = require('dialog');
 const crypto = require('crypto');
 const chokidar = require('chokidar');
-const openUri = require('open');
+const opn = require('opn');
 const config = 'config.json';
 
 if (fs.existsSync(config)) {
@@ -147,7 +147,7 @@ const methods = {
         var fpath = upath.join(working_dir, rpath);
 
         if (fs.existsSync(fpath)){
-            openUri(upath.resolve(fpath), editor);
+            opn(upath.resolve(fpath), { app: editor });
 
             response.setHeader('Location', `dav://${request.headers.host}${uri.pathname}`);
             response.statusCode = 302;
