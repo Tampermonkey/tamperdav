@@ -151,7 +151,10 @@ const methods = {
         var fpath = upath.join(working_dir, rpath);
 
         if (fs.existsSync(fpath)){
-            opn(upath.resolve(fpath), { app: editor });
+
+            if (process.env['DISPLAY']){
+              opn(upath.resolve(fpath), { app: editor });
+            }
 
             response.setHeader('Location', `dav://${request.headers.host}${uri.pathname}`);
             response.statusCode = 302;
