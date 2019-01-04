@@ -8,7 +8,7 @@ const fs = require('fs');
 const upath = require('upath');
 const http = require('http');
 const url = require('url');
-const dialog = require('dialog');
+let dialog = require('dialog');
 const crypto = require('crypto');
 const chokidar = require('chokidar');
 const opn = require('opn');
@@ -16,6 +16,10 @@ const config = 'config.json';
 
 if (fs.existsSync(config)) {
     args = JSON.parse(fs.readFileSync(config));
+}
+
+if (!process.env['DISPLAY']){
+  dialog = console
 }
 
 [ 'username', 'password' ].forEach(function(k) { args[k] = args[k] || process.env['TD_' + k.toUpperCase()]; });
