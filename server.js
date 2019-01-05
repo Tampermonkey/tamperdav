@@ -18,9 +18,6 @@ if (fs.existsSync(config)) {
     args = JSON.parse(fs.readFileSync(config));
 }
 
-if (!process.env['DISPLAY']){
-  dialog = console
-}
 
 [ 'username', 'password' ].forEach(function(k) { args[k] = args[k] || process.env['TD_' + k.toUpperCase()]; });
 
@@ -28,6 +25,10 @@ process.argv.forEach(function(val/*, index, array*/) {
     var s = val.replace(/^[-]{1,2}/, '').split('=');
     args[s[0]] = s[1] || true;
 });
+
+if (args.headless){
+  dialog = console
+}
 
 const error = function(m) {
     console.error(m);
@@ -152,7 +153,7 @@ const methods = {
 
         if (fs.existsSync(fpath)){
 
-            if (process.env['DISPLAY']){
+            if (!args.headless){
               opn(upath.resolve(fpath), { app: editor });
             }
 
