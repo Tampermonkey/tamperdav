@@ -167,7 +167,7 @@ const methods = {
         });
 
         request.on('end', function () {
-            fs.writeFileSync(fpath, Buffer.concat(data).toString());
+            fs.writeFileSync(fpath, Buffer.concat(data));
 
             var ts;
             if ((ts = request.headers['x-oc-mtime'])) {
