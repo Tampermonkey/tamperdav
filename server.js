@@ -8,7 +8,7 @@ const fs = require('fs');
 const upath = require('upath');
 const http = require('http');
 const url = require('url');
-const dialog = require('dialog');
+let dialog = require('dialog');
 const crypto = require('crypto');
 const chokidar = require('chokidar');
 const opn = require('opn');
@@ -18,12 +18,17 @@ if (fs.existsSync(config)) {
     args = JSON.parse(fs.readFileSync(config));
 }
 
+
 [ 'username', 'password' ].forEach(function(k) { args[k] = args[k] || process.env['TD_' + k.toUpperCase()]; });
 
 process.argv.forEach(function(val/*, index, array*/) {
     var s = val.replace(/^[-]{1,2}/, '').split('=');
     args[s[0]] = s[1] || true;
 });
+
+if (args.headless){
+  dialog = console
+}
 
 const error = function(m) {
     console.error(m);
@@ -147,7 +152,10 @@ const methods = {
         var fpath = upath.join(working_dir, rpath);
 
         if (fs.existsSync(fpath)){
-            opn(upath.resolve(fpath), { app: editor });
+
+            if (!args.headless){
+              opn(upath.resolve(fpath), { app: editor });
+            }
 
             response.setHeader('Location', `dav://${request.headers.host}${uri.pathname}`);
             response.statusCode = 302;
