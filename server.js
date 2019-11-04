@@ -14,8 +14,26 @@ const chokidar = require('chokidar');
 const opn = require('opn');
 const config = 'config.json';
 
+const error = function(m) {
+    console.error(m);
+    if (!args['no-dialog']) {
+        dialog.err(m, 'TamperDAV');
+    }
+};
+
+const warn = function(m) {
+    console.warn(m);
+    if (!args['no-dialog']) {
+        dialog.warn(m, 'TamperDAV');
+    }
+};
+
 if (fs.existsSync(config)) {
-    args = JSON.parse(fs.readFileSync(config));
+    try {
+        args = JSON.parse(fs.readFileSync(config));
+    } catch (e) {
+        return error(`${config}: ${e.message}`);
+    }
 }
 
 [ 'username', 'password' ].forEach(function(k) { args[k] = args[k] || process.env['TD_' + k.toUpperCase()]; });
@@ -24,11 +42,6 @@ process.argv.forEach(function(val/*, index, array*/) {
     var s = val.replace(/^[-]{1,2}/, '').split('=');
     args[s[0]] = s[1] || true;
 });
-
-const error = function(m) {
-    console.error(m);
-    dialog.err(m, 'TamperDAV');
-};
 
 global.btoa = function(s) {
     if (typeof Buffer.from === 'function') {
@@ -48,7 +61,7 @@ if (!fs.existsSync(working_dir)) {
 }
 
 if (!args['no-auth-warning'] && (!args.username || !args.password)) {
-    dialog.warn('TamperDAV is running without any form of authentication. It\'s strongly recommended to configure username and password!', 'TamperDAV');
+    warn('TamperDAV is running without any form of authentication. It\'s strongly recommended to configure username and password!', 'TamperDAV');
 }
 
 RegExp.escape = RegExp.escape || function(s) {
@@ -121,9 +134,18 @@ const methods = {
         var fpath = upath.join(working_dir, rpath);
 
         if (fs.existsSync(fpath)){
-            response.statusCode = 200;
-            response.setHeader('Content-Type', 'application/octet-stream');
-            response.end(fs.readFileSync(fpath));
+            let content;
+            try {
+                content = fs.readFileSync(fpath);
+                response.statusCode = 200;
+                response.setHeader('Content-Type', 'application/octet-stream');
+            } catch(e) {
+                console.error(e);
+                response.statusCode = 500;
+                content = e.message;
+            } finally {
+                response.end(content);
+            }
         } else {
             response.statusCode = 404;
             response.end();
