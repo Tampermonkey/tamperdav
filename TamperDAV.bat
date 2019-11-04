@@ -1,3 +1,5 @@
+if exist config.json goto skip_setup
+
 call npm install
 
 mkdir dav
@@ -8,5 +10,6 @@ mkdir dav
   echo "open-in-editor": true
   echo }
 ) > config.json
+:skip_setup
 
 node server.js

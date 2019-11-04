@@ -1,14 +1,17 @@
 #!/bin/bash
 
-npm install
-mkdir dav 2>/dev/null
+if [ ! -e "config.json" ]
+then
+    npm install
+    mkdir dav 2>/dev/null
 
-cat > config.json <<EOL
+    cat > config.json <<EOL
 {
     "path": "dav",
     "meta-touch": true,
     "open-in-editor": true
 }
 EOL
+fi
 
 node server.js
