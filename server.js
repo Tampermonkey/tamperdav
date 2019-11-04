@@ -14,17 +14,6 @@ const chokidar = require('chokidar');
 const opn = require('opn');
 const config = 'config.json';
 
-if (fs.existsSync(config)) {
-    args = JSON.parse(fs.readFileSync(config));
-}
-
-[ 'username', 'password' ].forEach(function(k) { args[k] = args[k] || process.env['TD_' + k.toUpperCase()]; });
-
-process.argv.forEach(function(val/*, index, array*/) {
-    var s = val.replace(/^[-]{1,2}/, '').split('=');
-    args[s[0]] = s[1] || true;
-});
-
 const error = function(m) {
     console.error(m);
     if (!args['no-dialog']) {
@@ -38,6 +27,21 @@ const warn = function(m) {
         dialog.warn(m, 'TamperDAV');
     }
 };
+
+if (fs.existsSync(config)) {
+    try {
+        args = JSON.parse(fs.readFileSync(config));
+    } catch (e) {
+        return error(`${config}: ${e.message}`);
+    }
+}
+
+[ 'username', 'password' ].forEach(function(k) { args[k] = args[k] || process.env['TD_' + k.toUpperCase()]; });
+
+process.argv.forEach(function(val/*, index, array*/) {
+    var s = val.replace(/^[-]{1,2}/, '').split('=');
+    args[s[0]] = s[1] || true;
+});
 
 global.btoa = function(s) {
     if (typeof Buffer.from === 'function') {
