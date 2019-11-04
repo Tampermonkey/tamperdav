@@ -27,7 +27,16 @@ process.argv.forEach(function(val/*, index, array*/) {
 
 const error = function(m) {
     console.error(m);
-    dialog.err(m, 'TamperDAV');
+    if (!args['no-dialog']) {
+        dialog.err(m, 'TamperDAV');
+    }
+};
+
+const warn = function(m) {
+    console.warn(m);
+    if (!args['no-dialog']) {
+        dialog.warn(m, 'TamperDAV');
+    }
 };
 
 global.btoa = function(s) {
@@ -48,7 +57,7 @@ if (!fs.existsSync(working_dir)) {
 }
 
 if (!args['no-auth-warning'] && (!args.username || !args.password)) {
-    dialog.warn('TamperDAV is running without any form of authentication. It\'s strongly recommended to configure username and password!', 'TamperDAV');
+    warn('TamperDAV is running without any form of authentication. It\'s strongly recommended to configure username and password!', 'TamperDAV');
 }
 
 RegExp.escape = RegExp.escape || function(s) {
