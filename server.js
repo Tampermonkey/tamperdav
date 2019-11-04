@@ -134,9 +134,18 @@ const methods = {
         var fpath = upath.join(working_dir, rpath);
 
         if (fs.existsSync(fpath)){
-            response.statusCode = 200;
-            response.setHeader('Content-Type', 'application/octet-stream');
-            response.end(fs.readFileSync(fpath));
+            let content;
+            try {
+                content = fs.readFileSync(fpath);
+                response.statusCode = 200;
+                response.setHeader('Content-Type', 'application/octet-stream');
+            } catch(e) {
+                console.error(e);
+                response.statusCode = 500;
+                content = e.message;
+            } finally {
+                response.end(content);
+            }
         } else {
             response.statusCode = 404;
             response.end();
