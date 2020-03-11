@@ -79,7 +79,7 @@ $ TD_USERNAME=derjanb TD_PASSWORD=secret node server.js --path=dav/ --port=6000
     "max-cursors": 512,
     "open-in-editor": "sublime_text",
     "meta-touch": true,
-    "debug": true,
+    "debug": true
 }
 ```
 
