@@ -10,12 +10,12 @@
   "files": [
     "server.js"
   ],
-  "dependencies": [
-    "chokidar",
-    "upath",
-    "dialog",
-    "opn",
-    "glob"
-  ],
+  "dependencies": {
+    "chokidar": "3.4.3",
+    "dialog": "0.3.1",
+    "glob": "7.1.6",
+    "open": "7.3.0",
+    "upath": "2.0.1"
+  },
   "main": "server.js"
 }
