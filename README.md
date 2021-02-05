@@ -29,7 +29,7 @@ $ ./tamperdav.sh
 
 Notes:
  * in order to allow Tampermonkey to use the full TamperDAV feature set, please make sure TamperDAV is **running** when Tampermonkey is started.
- * you can easily find the right file to edit by running `node find_script_in_meta.js --name="My Script Name"`
+ * Tampermonkey will sync all scripts into a subfolder of the configured dav-directory i.e. ```Tampermonkey/sync``` using it's internally generated UUID for the filename. The actual file to edit can easily be found by running `node find_script_in_meta.js --name="My Script Name"`. Alternatively you can find the the UUID via Tampermonkey's UI by navigating to the script and retrieving it from the address bar.
 
 ## mount
 
