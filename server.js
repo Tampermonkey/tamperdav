@@ -12,7 +12,6 @@ const dialog = require('dialog');
 const crypto = require('crypto');
 const chokidar = require('chokidar');
 const open = require('open');
-const config = 'config.json';
 
 const error = function(m) {
     console.error(m);
@@ -27,6 +26,10 @@ const warn = function(m) {
         dialog.warn(m, 'TamperDAV');
     }
 };
+
+// early parsing for the config option
+let optionConfig = process.argv.reduce((a, c) => c.split('--config=')[1] || a, '');
+const config = optionConfig || 'config.json';
 
 if (fs.existsSync(config)) {
     try {
