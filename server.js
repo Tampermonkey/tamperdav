@@ -161,7 +161,7 @@ const methods = {
             if (process.platform == 'win32') {
                 editor = 'notepad';
             } else {
-                editor = undefined;
+                editor = 'xdg-open';
             }
         }
 
