@@ -12,4 +12,4 @@ mkdir dav
 ) > config.json
 :skip_setup
 
-node server.js
+node server.js %*
