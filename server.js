@@ -46,6 +46,50 @@ process.argv.forEach(function(val/*, index, array*/) {
     args[s[0]] = s[1] || true;
 });
 
+if (process.argv.includes('--help')) {
+    console.log(
+`Usage: ${process.platform === 'win32' ? 'TamperDAV.bat' : './tamperdav.sh'} [options]
+Starts a WebDAV server using Node.js
+
+Options:
+        --help                     Shows this information
+        --config=[path]            Uses the specified config file (default: config.json)
+        --no-auth-warning          Disables the warning regarding missing authentication due
+                                   to missing username and password
+        --meta-touch               Updates corresponding meta file upon changing a script
+                                   file, resulting in connected browsers syncing these changes
+        --debug                    Provides some more detailed output for debugging purposes
+        --open-in-editor=[editor]  The editor to use when pressing the cloud editor icon in
+                                   Tampermonkey
+        --open-in-editor           Same as above, but uses ${process.platform === 'win32' ? 'notepad.exe' : 'the editor chosen by xdg-open'}
+        --username=[username]      The username for clients to authenticate to the server with
+        --password=[password]      The password for clients to authenticate to the server with
+        --host=[host]              The network address to bind on (default: localhost)
+        --port=[port]              The port that the server will listen on (default: 7000)
+        --path=[path]              The path, relative to server.js, that will serve as storage
+        --max-cursors=[amount]     The maximum number of cached changes the server will store
+
+All of these options except "--help" can be specified in a JSON formatted file config.json
+in the same directory as server.js. An example is:
+{
+    "path": "dav",
+    "meta-touch": true,
+    "username": "foo",
+    "password": "bar",
+    "port": 1234
+}
+
+Options provided as command line parameters all have precedence over options stored in the
+config file.
+
+Username and password can also be specified in the environment variables TD_USERNAME and
+TD_PASSWORD respectively. These have priority over over the config file, but not over the
+command line parameters.
+`
+    );
+    process.exit(0);
+}
+
 global.btoa = function(s) {
     if (typeof Buffer.from === 'function') {
         return Buffer.from(s, 'base64').toString(); // Node 5.10+
