@@ -18,4 +18,4 @@ then
 EOL
 fi
 
-node server.js
+node server.js $@
