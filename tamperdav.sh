@@ -1,5 +1,9 @@
 #!/bin/bash
 
+scriptpath=$(dirname "$(realpath "$0")")
+
+cd $scriptpath
+
 if [ ! -e "config.json" ]
 then
     npm install
@@ -14,4 +18,4 @@ then
 EOL
 fi
 
-node server.js
+node server.js $@
