@@ -94,4 +94,6 @@ $ TD_USERNAME=derjanb TD_PASSWORD=secret node server.js --path=dav/ --port=6000
  - ```max-cursors``` number of cached changes
  - ```open-in-editor``` if "true" then if Windows "notepad" editor is used, else ```xgd-open```; or the executable as string i.e. "gedit", "notepad", ...
  - ```meta-touch``` touch a sync entries's meta file automatically to make Tampermonkey start a sync on script changes
+ - ```no-dialog``` Disables the use of a dialog to show messages to the user
+ - ```headless``` Implies --no-dialog and disables editor opening
  - ```debug``` print debug information

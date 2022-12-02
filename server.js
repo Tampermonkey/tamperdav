@@ -15,14 +15,14 @@ const open = require('open');
 
 const error = function(m) {
     console.error(m);
-    if (!args['no-dialog']) {
+    if (!args['no-dialog'] && !args.headless) {
         dialog.err(m, 'TamperDAV');
     }
 };
 
 const warn = function(m) {
     console.warn(m);
-    if (!args['no-dialog']) {
+    if (!args['no-dialog'] && !args.headless) {
         dialog.warn(m, 'TamperDAV');
     }
 };
@@ -68,6 +68,8 @@ Options:
         --port=[port]              The port that the server will listen on (default: 7000)
         --path=[path]              The path, relative to server.js, that will serve as storage
         --max-cursors=[amount]     The maximum number of cached changes the server will store
+        --no-dialog                Disables the use of a dialog to show messages to the user
+        --headless                 Implies --no-dialog and disables editor opening
 
 All of these options except "--help" can be specified in a JSON formatted file config.json
 in the same directory as server.js. An example is:
@@ -200,7 +202,7 @@ const methods = {
     },
     editor: function(uri, request, response) {
         var editor = args['open-in-editor'];
-        if (!editor) {
+        if (!editor || args.headless) {
             response.statusCode = 501;
             response.end();
             return;
