@@ -1,10 +1,12 @@
 TamperDAV
 =============
+###### README versions: [EN](README.md) | [pt-BR](doc/lang/pt-BR/README_pt-BR.md)
+
+---
 
 A WebDAV-like server to sync Tampermonkey scripts and edit them with an external editor.
 
-**WARNING:** this is not a 100% WebDAV-compliant server. Many clients should, but don't necessarily have to work!
-
+> **WARNING:** this is not a 100% WebDAV-compliant server. Many clients should, but don't necessarily have to work!
 
 # Usage
 
@@ -97,3 +99,8 @@ $ TD_USERNAME=derjanb TD_PASSWORD=secret node server.js --path=dav/ --port=6000
  - ```no-dialog``` Disables the use of a dialog to show messages to the user
  - ```headless``` Implies --no-dialog and disables editor opening
  - ```debug``` print debug information
+
+---
+
+# License
+[MIT](LICENSE)
