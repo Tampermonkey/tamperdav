@@ -138,6 +138,12 @@ const methods = {
         var rpath = uri.pathname;
         var fpath = upath.join(working_dir, rpath);
 
+        if (!fpath.startsWith(working_dir)) {
+            response.statusCode = 403;
+            response.end();
+            return;
+        }
+
         if (!fs.existsSync(fpath)) {
             response.statusCode = 404;
             response.end();
@@ -165,6 +171,12 @@ const methods = {
         var rpath = uri.pathname;
         var fpath = upath.join(working_dir, rpath);
 
+        if (!fpath.startsWith(working_dir)) {
+            response.statusCode = 403;
+            response.end();
+            return;
+        }
+
         if (fs.existsSync(fpath)){
             response.statusCode = 405;
             response.end('<d:error xmlns:d="DAV:" xmlns:td="http://dav.tampermonkey.net/ns"><td:exception>MethodNotAllowed</td:exception><td:message>The resource you tried to create already exists</td:message></d:error>');
@@ -181,6 +193,12 @@ const methods = {
     get: function(uri, request, response) {
         var rpath = uri.pathname;
         var fpath = upath.join(working_dir, rpath);
+
+        if (!fpath.startsWith(working_dir)) {
+            response.statusCode = 403;
+            response.end();
+            return;
+        }
 
         if (fs.existsSync(fpath)){
             let content;
@@ -217,6 +235,12 @@ const methods = {
         var rpath = uri.pathname;
         var fpath = upath.join(working_dir, rpath);
 
+        if (!fpath.startsWith(working_dir)) {
+            response.statusCode = 403;
+            response.end();
+            return;
+        }
+
         if (fs.existsSync(fpath)){
             open(upath.resolve(fpath), { app: editor });
 
@@ -231,6 +255,12 @@ const methods = {
     put: function(uri, request, response) {
         var rpath = uri.pathname;
         var fpath = upath.join(working_dir, rpath);
+
+        if (!fpath.startsWith(working_dir)) {
+            response.statusCode = 403;
+            response.end();
+            return;
+        }
 
         var data = [];
         request.on('data', function (chunk) {
@@ -258,6 +288,12 @@ const methods = {
         var rpath = uri.pathname;
         var fpath = upath.join(working_dir, rpath);
 
+        if (!fpath.startsWith(working_dir)) {
+            response.statusCode = 403;
+            response.end();
+            return;
+        }
+
         try {
             fs.unlinkSync(fpath);
             response.statusCode = 204;
@@ -271,6 +307,12 @@ const methods = {
     head: function(uri, request, response) {
         var rpath = uri.pathname;
         var fpath = upath.join(working_dir, rpath);
+
+        if (!fpath.startsWith(working_dir)) {
+            response.statusCode = 403;
+            response.end();
+            return;
+        }
 
         var done, stats;
         if (fs.existsSync(fpath)){
@@ -295,6 +337,12 @@ const methods = {
     subscribe: function(uri, request, response) {
         var rpath = uri.pathname;
         var fpath = upath.join(working_dir, rpath);
+
+        if (!fpath.startsWith(working_dir)) {
+            response.statusCode = 403;
+            response.end();
+            return;
+        }
 
         if (!fs.existsSync(fpath)) {
             response.statusCode = 404;
