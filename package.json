@@ -13,7 +13,7 @@
   "dependencies": {
     "chokidar": "3.4.3",
     "dialog": "0.3.1",
-    "glob": "7.1.6",
+    "glob": "13.0.6",
     "open": "7.3.0",
     "upath": "2.0.1"
   },
