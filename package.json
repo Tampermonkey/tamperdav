@@ -19,6 +19,6 @@
   },
   "main": "server.js",
   "scripts": {
-    "test": "node test/meta-mtime.test.js"
+    "test": "node test/meta-mtime.test.js && node test/script-mapping.test.js"
   }
 }

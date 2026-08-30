@@ -53,6 +53,11 @@ $ mkdir dav
 $ node server.js --path=dav/
 ```
 
+``` sh
+# run the tests
+$ npm test
+```
+
 
 # Config
 
@@ -97,3 +102,27 @@ $ TD_USERNAME=derjanb TD_PASSWORD=secret node server.js --path=dav/ --port=6000
  - ```no-dialog``` Disables the use of a dialog to show messages to the user
  - ```headless``` Implies --no-dialog and disables editor opening
  - ```debug``` print debug information
+ - ```scripts``` a map of script ```@name``` to an absolute path outside the storage directory; see [Editing a script in place](#editing-a-script-in-place)
+
+# Editing a script in place
+
+A script you develop in a repository normally reaches Tampermonkey by symlinking the repository
+file into the sync directory. That link is unowned -- anything that replaces the file instead of
+writing through it strands the repository copy while the browser keeps syncing against a dead
+file -- and it is keyed on Tampermonkey's internal UUID, which changes whenever the script is
+reinstalled.
+
+```scripts``` lets the server own that link instead, keyed on the script's ```@name```:
+
+``` json
+{
+    "path": "dav",
+    "scripts": {
+        "My Script": "/home/me/src/my-script/my-script.user.js"
+    }
+}
+```
+
+The server then reads, writes and lists that file in place of one in the storage directory. No
+symlink is needed, the sync directory holds only the ```.meta.json``` sidecar, and a delete
+arriving from the browser is refused rather than removing the repository file.
