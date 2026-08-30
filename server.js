@@ -398,6 +398,32 @@ const getUrlArgs = function(url) {
     return c;
 };
 
+// Tampermonkey decides whether to pull a script by comparing the mtime it sees for the
+// script's `<uuid>.meta.json` sidecar -- never the script's own bytes or @version. Those
+// two decouple whenever the script changes without the sidecar being rewritten: a server
+// started after the edit (the watcher is armed lazily, on the first sync request), a
+// restart that resets the watcher, or --meta-touch simply not passed. The browser then
+// holds a stale script indefinitely, with nothing reporting it.
+//
+// Reporting the sidecar's mtime as max(sidecar, script) removes the decoupling at the
+// source: the value is derived from the file whose content it is standing in for, so it
+// cannot lag behind it. fs.statSync follows symlinks, so a sidecar whose script is a
+// symlink into a repo tracks the repo file.
+const metaMtimeMs = function(cpath, stats) {
+    var own = stats.mtimeMs || +new Date(stats.mtime);
+    var m = cpath.match(/^(.*)\.meta\.json$/);
+    if (!m) return own;
+
+    var script;
+    try {
+        script = fs.statSync(`${m[1]}.user.js`);
+    } catch (e) {
+        return own;
+    }
+
+    return Math.max(own, script.mtimeMs || +new Date(script.mtime));
+};
+
 const arrayToXml = function(rpath, files, cursor) {
     var fpath = upath.join(working_dir, rpath);
 
@@ -417,7 +443,7 @@ const arrayToXml = function(rpath, files, cursor) {
             dir = false;
         }
 
-        var mtime = new Date(stats.mtimeMs || stats.mtime);
+        var mtime = new Date(metaMtimeMs(cpath, stats));
         var size = stats.size;
         var lastmodified = mtime.toGMTString();
 
