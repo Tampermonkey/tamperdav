@@ -68,6 +68,12 @@ Options:
         --port=[port]              The port that the server will listen on (default: 7000)
         --path=[path]              The path, relative to server.js, that will serve as storage
         --max-cursors=[amount]     The maximum number of cached changes the server will store
+        --scripts=[json]           A map of script @name to an absolute path outside the
+                                   storage directory, e.g. {"My Script": "/src/x.user.js"}.
+                                   The server reads, writes and lists the mapped file in
+                                   place of one in the storage directory, so a script kept
+                                   in a repository needs no symlink. Usually set in the
+                                   config file rather than on the command line.
         --no-dialog                Disables the use of a dialog to show messages to the user
         --headless                 Implies --no-dialog and disables editor opening
 
@@ -157,7 +163,7 @@ const methods = {
             var wc = watcherCache[rpath];
             var files, d;
             if (!(d = request.headers.depth) || d > 0) {
-                files = fs.readdirSync(fpath);
+                files = withMappedScripts(fpath, fs.readdirSync(fpath));
             }
 
              xml = arrayToXml(rpath, [ '.' ].concat(files || []), wc && (!d || d > 0) ? wc.current_cursor : undefined);
@@ -200,6 +206,8 @@ const methods = {
             return;
         }
 
+        fpath = resolvePath(fpath);
+
         if (fs.existsSync(fpath)){
             let content;
             try {
@@ -241,6 +249,8 @@ const methods = {
             return;
         }
 
+        fpath = resolvePath(fpath);
+
         if (fs.existsSync(fpath)){
             open(upath.resolve(fpath), { app: editor });
 
@@ -261,6 +271,8 @@ const methods = {
             response.end();
             return;
         }
+
+        fpath = resolvePath(fpath);
 
         var data = [];
         request.on('data', function (chunk) {
@@ -294,6 +306,13 @@ const methods = {
             return;
         }
 
+        if (mappedScriptPath(fpath)) {
+            console.error(`refusing to delete ${rpath}: it is mapped to ${mappedScriptPath(fpath)}`);
+            response.statusCode = 403;
+            response.end('<d:error xmlns:d="DAV:" xmlns:td="http://dav.tampermonkey.net/ns"><td:exception>Forbidden</td:exception><td:message>This script is mapped to a file outside the storage directory and will not be deleted through the server</td:message></d:error>');
+            return;
+        }
+
         try {
             fs.unlinkSync(fpath);
             response.statusCode = 204;
@@ -313,6 +332,8 @@ const methods = {
             response.end();
             return;
         }
+
+        fpath = resolvePath(fpath);
 
         var done, stats;
         if (fs.existsSync(fpath)){
@@ -398,6 +419,87 @@ const getUrlArgs = function(url) {
     return c;
 };
 
+// --- external script mapping -------------------------------------------------
+//
+// `"scripts": { "<@name>": "/abs/path/to/thing.user.js" }` in the config file lets the
+// server own the link between Tampermonkey's storage and a file in a repo, instead of
+// that link being a symlink sitting in the sync directory. The symlink arrangement costs
+// two things. It is unowned -- anything that replaces the file rather than writing through
+// it strands the repo copy, silently, with the browser still syncing happily against a
+// dead file. And it is keyed on Tampermonkey's internal UUID, so reinstalling a script
+// changes the key and the link has to be re-derived and re-made by hand. Keying on @name,
+// which the sidecar already records, survives both.
+//
+// The mapping deliberately points outside working_dir, so it is resolved AFTER each
+// handler's path-traversal guard, never before.
+const scriptMap = (args.scripts && typeof args.scripts === 'object') ? args.scripts : null;
+
+// The absolute path a `<uuid>.user.js` is mapped to, or null when it is an ordinary file.
+const mappedScriptPath = function(cpath) {
+    if (!scriptMap) return null;
+
+    var m = cpath.match(/^(.*)\.user\.js$/);
+    if (!m) return null;
+
+    var meta;
+    try {
+        meta = JSON.parse(fs.readFileSync(`${m[1]}.meta.json`));
+    } catch (e) {
+        return null;
+    }
+
+    return (meta && meta.name && scriptMap[meta.name]) || null;
+};
+
+// A path inside the sync directory, resolved through the mapping. Falls back to the
+// path itself, so every call site can use it unconditionally.
+const resolvePath = function(cpath) {
+    return mappedScriptPath(cpath) || cpath;
+};
+
+// A mapped script has no file in the sync directory, so readdir does not see it and the
+// listing would omit the script Tampermonkey is meant to pull. Synthesize the name from
+// each sidecar that resolves to a mapping.
+const withMappedScripts = function(fpath, files) {
+    if (!scriptMap) return files;
+
+    var extra = files.filter(function(f) {
+        var m = f.match(/^(.*)\.meta\.json$/);
+        return m && !files.includes(`${m[1]}.user.js`) &&
+            mappedScriptPath(upath.join(fpath, `${m[1]}.user.js`));
+    }).map(function(f) {
+        return f.replace(/\.meta\.json$/, '.user.js');
+    });
+
+    return extra.length ? files.concat(extra) : files;
+};
+
+// Tampermonkey decides whether to pull a script by comparing the mtime it sees for the
+// script's `<uuid>.meta.json` sidecar -- never the script's own bytes or @version. Those
+// two decouple whenever the script changes without the sidecar being rewritten: a server
+// started after the edit (the watcher is armed lazily, on the first sync request), a
+// restart that resets the watcher, or --meta-touch simply not passed. The browser then
+// holds a stale script indefinitely, with nothing reporting it.
+//
+// Reporting the sidecar's mtime as max(sidecar, script) removes the decoupling at the
+// source: the value is derived from the file whose content it is standing in for, so it
+// cannot lag behind it. fs.statSync follows symlinks, so a sidecar whose script is a
+// symlink into a repo tracks the repo file.
+const metaMtimeMs = function(cpath, stats) {
+    var own = stats.mtimeMs || +new Date(stats.mtime);
+    var m = cpath.match(/^(.*)\.meta\.json$/);
+    if (!m) return own;
+
+    var script;
+    try {
+        script = fs.statSync(resolvePath(`${m[1]}.user.js`));
+    } catch (e) {
+        return own;
+    }
+
+    return Math.max(own, script.mtimeMs || +new Date(script.mtime));
+};
+
 const arrayToXml = function(rpath, files, cursor) {
     var fpath = upath.join(working_dir, rpath);
 
@@ -407,7 +509,7 @@ const arrayToXml = function(rpath, files, cursor) {
 
         var stats, dir;
         try {
-            stats = fs.statSync(cpath);
+            stats = fs.statSync(resolvePath(cpath));
             dir = stats.isDirectory();
         } catch (e) {
             stats = {
@@ -417,7 +519,7 @@ const arrayToXml = function(rpath, files, cursor) {
             dir = false;
         }
 
-        var mtime = new Date(stats.mtimeMs || stats.mtime);
+        var mtime = new Date(metaMtimeMs(cpath, stats));
         var size = stats.size;
         var lastmodified = mtime.toGMTString();
 
