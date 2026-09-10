@@ -17,5 +17,8 @@
     "open": "7.3.0",
     "upath": "2.0.1"
   },
-  "main": "server.js"
+  "main": "server.js",
+  "scripts": {
+    "test": "node test/meta-mtime.test.js"
+  }
 }
